@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Re7 TCG Index Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: slab-label tiles in a responsive grid, one per index source, headline stat + change chips */
+:root{
+  --bg:#eef0f3; --surface:#ffffff; --fg:#161a22; --muted:#5d6574; --line:#d5d9e0;
+  --accent:#6b3fd6; --accent-soft:#efe9fc;
+  --up:#13794a; --up-soft:#e2f3ea; --down:#b42318; --down-soft:#fbe7e5; --flat-soft:#eceef2;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12151b; --surface:#1b1f27; --fg:#e8ebf0; --muted:#98a0ae; --line:#2c323d;
+  --accent:#a88bff; --accent-soft:#2a2240;
+  --up:#4cc98a; --up-soft:#16301f; --down:#ff7a6e; --down-soft:#3a1d1a; --flat-soft:#262b35; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12151b; --surface:#1b1f27; --fg:#e8ebf0; --muted:#98a0ae; --line:#2c323d;
+  --accent:#a88bff; --accent-soft:#2a2240;
+  --up:#4cc98a; --up-soft:#16301f; --down:#ff7a6e; --down-soft:#3a1d1a; --flat-soft:#262b35; color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 48px}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:2px solid var(--fg);padding-bottom:14px}
+h1{font-family:var(--display);font-weight:700;font-size:2.4rem;letter-spacing:.01em;margin:0;line-height:1;text-transform:uppercase;text-wrap:balance}
+h1 span{color:var(--accent)}
+.meta{font-family:var(--mono);font-size:.78rem;color:var(--muted);letter-spacing:.04em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+a.slab{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:6px;text-decoration:none;color:inherit;overflow:hidden;transition:transform .15s ease,border-color .15s ease}
+a.slab:hover{transform:translateY(-2px);border-color:var(--accent)}
+a.slab:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.label{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 14px;background:var(--accent-soft);border-bottom:1px solid var(--line)}
+.cert{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;color:var(--accent);font-weight:500}
+.go{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+.body{padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0;flex:1}
+.name{font-family:var(--display);font-weight:600;font-size:1.4rem;line-height:1.05;text-transform:uppercase;letter-spacing:.01em}
+.head{display:flex;flex-direction:column;gap:2px}
+.k{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.v{font-family:var(--mono);font-size:1.7rem;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.1}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--mono);font-size:.74rem;font-variant-numeric:tabular-nums;padding:3px 7px;border-radius:4px;background:var(--flat-soft);color:var(--fg);white-space:nowrap}
+.chip.up{background:var(--up-soft);color:var(--up)}
+.chip.down{background:var(--down-soft);color:var(--down)}
+.rows{display:flex;flex-direction:column;gap:4px;border-top:1px dashed var(--line);padding-top:8px}
+.row{display:flex;justify-content:space-between;gap:10px;font-size:.82rem}
+.row b{font-family:var(--mono);font-weight:500;font-variant-numeric:tabular-nums}
+.row b.up{color:var(--up)} .row b.down{color:var(--down)}
+.none{font-size:.85rem;color:var(--muted);line-height:1.45}
+.foot{display:flex;justify-content:space-between;gap:8px;margin-top:auto;padding-top:8px;font-family:var(--mono);font-size:.7rem;color:var(--muted);flex-wrap:wrap}
+.fg-body{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px 28px;padding:16px 14px 8px}
+@media (max-width:640px){.fg-body{grid-template-columns:minmax(0,1fr)}}
+.fg-main{display:flex;flex-direction:column;gap:12px;min-width:0}
+.fg-tag{font-family:var(--body);font-size:.85rem;font-weight:500;padding:3px 8px;border-radius:4px;background:var(--accent-soft);color:var(--accent);vertical-align:middle}
+.gauge{position:relative;padding-top:4px}
+.track{height:10px;border-radius:5px;background:linear-gradient(90deg,var(--down),var(--muted) 50%,var(--up))}
+.mark{position:absolute;top:0;width:4px;height:18px;margin-left:-2px;border-radius:2px;background:var(--fg);box-shadow:0 0 0 2px var(--surface)}
+.ticks{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.68rem;color:var(--muted);margin-top:6px}
+.fg-rows{border-top:none;padding-top:0}
+@media (max-width:640px){.fg-rows{border-top:1px dashed var(--line);padding-top:10px}}
+.fg-foot{font-family:var(--mono);font-size:.7rem;color:var(--muted);padding:6px 14px 14px}
+footer{font-size:.8rem;color:var(--muted);line-height:1.5}
+@media (prefers-reduced-motion:reduce){a.slab{transition:none}a.slab:hover{transform:none}}
+.embed{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px}.embed-credit{font-size:.75rem;color:var(--muted);margin:6px 2px 0}.embed-credit a{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Re7 TCG <span>Index</span> Hub</h1>
+    <div class="meta">9 SOURCES · SNAPSHOT 5 NOV 2026</div>
+  </header>
+
+  <section class="embed">
+    <iframe src="https://tcgcharts.com/embed/market-cap" width="100%" height="330" style="border:0;border-radius:12px;display:block" loading="lazy" title="Pokémon TCG market cap chart by TCGCharts"></iframe>
+    <p class="embed-credit"><a href="https://tcgcharts.com/charts">Pokémon TCG market cap</a> by TCGCharts</p>
+  </section>
+
+  <a class="slab fg" href="https://tcgcharts.com/charts/fear-and-greed-index" target="_blank" rel="noopener">
+    <div class="label"><span class="cert">SENTIMENT · TCGCHARTS FEAR &amp; GREED</span><span class="go">OPEN ↗</span></div>
+    <div class="fg-body">
+      <div class="fg-main">
+        <div class="head"><span class="k">Current reading</span><span class="v">45 <span class="fg-tag">Neutral</span></span></div>
+        <div class="gauge" role="img" aria-label="Fear and Greed 45 of 100">
+          <div class="track"></div><div class="mark" style="left:45%"></div>
+          <div class="ticks"><span>0 Extreme fear</span><span>50</span><span>100 Extreme greed</span></div>
+        </div>
+        <div class="chips"><span class="chip">Yesterday 46</span><span class="chip">Last week 50</span><span class="chip">Last month 42</span></div>
+      </div>
+      <div class="rows fg-rows">
+        <div class="row"><span>Momentum · on trend</span><b>54</b></div>
+        <div class="row"><span>Off the high · at the high</span><b>79</b></div>
+        <div class="row"><span>Volatility · choppy</span><b>6</b></div>
+        <div class="row"><span>Activity · normal</span><b>50</b></div>
+        <div class="row"><span>Breadth · mostly down</span><b>39</b></div>
+        <div class="row"><span>Strength · off the highs</span><b>25</b></div>
+      </div>
+    </div>
+    <div class="fg-foot">tcgcharts.com · as of 5 Nov 2026 · components 0 = fear, 100 = greed</div>
+  </a>
+
+  <div class="grid">
+    <a class="slab" href="https://cardpriceledger.com/indexes/overall/" target="_blank" rel="noopener">
+      <div class="label"><span class="cert">IDX 01</span><span class="go">OPEN ↗</span></div>
+      <div class="body">
+        <div class="name">Card Price Ledger</div>
+        <div class="head"><span class="k">Overall Market (Jan 2020 = 100)</span><span class="v">241.7</span></div>
+        <div class="chips"><span class="chip up">30D +10.8%</span><span class="chip up">90D +13.8%</span><span class="chip up">1Y +81.7%</span></div>
+        <div class="rows">
+          <div class="row"><span>WOTC Era · 30D</span><b class="up">+20.8%</b></div>
+          <div class="row"><span>EX Era · 30D</span><b class="up">+59.1%</b></div>
+          <div class="row"><span>Modern · 30D</span><b>0.0%</b></div>
+          <div class="row"><span>Charizard · 30D</span><b class="down">−1.9%</b></div>
+        </div>
+        <div class="foot"><span>cardpriceledger.com</span><span>no as-of date given</span></div>
+      </div>
+    </a>
+
+    <a class="slab" href="https://cardian.sg/market/markets/en" target="_blank" rel="noopener">
+      <div class="label"><span class="cert">IDX 02</span><span class="go">OPEN ↗</span></div>
+      <div class="body">
+        <div class="name">Cardian · English Market</div>
+        <p class="none">Site blocks automated reads. Open it for live figures.</p>
+        <div class="foot"><span>cardian.sg</span></div>
+      </div>
+    </a>
+
+    <a class="slab" href="https://ultraball.com/pokemon-card-index" target="_blank" rel="noopener">
+      <div class="label"><span class="cert">IDX 03</span><span class="go">OPEN ↗</span></div>
+      <div class="body">
+        <div class="name">UltraBall</div>
+        <div class="head"><span class="k">Vintage 100 (monthly)</span><span class="v">196.6</span></div>
+        <div class="chips"><span class="chip up">12M +89.0%</span><span class="chip up">Since Jan 22 +96.6%</span></div>
+        <div class="rows">
+          <div class="row"><span>Modern 100</span><b>80.7</b></div>
+          <div class="row"><span>Modern 100 · 12M</span><b class="up">+30.6%</b></div>
+          <div class="row"><span>Modern 100 · since Jan 22</span><b class="down">−19.3%</b></div>
+        </div>
+        <div class="foot"><span>ultraball.com</span><span>as of Jul 2026</span></div>
+      </div>
+    </a>
+
+    <a class="slab" href="https://tcgcharts.com/charts/pkmn200" target="_blank" rel="noopener">
+      <div class="label"><span class="cert">IDX 04</span><span class="go">OPEN ↗</span></div>
+      <div class="body">
+        <div class="name">TCGCharts · PKMN200</div>
+        <div class="head"><span class="k">Pokémon 200 index</span><span class="v">3,062</span></div>
+        <div class="chips"><span class="chip up">30D +8.6%</span></div>
+        <div class="rows">
+          <div class="row"><span>Pokémon card market cap</span><b>$16.74B</b></div>
+          <div class="row"><span>Sales volume · 30D</span><b>$242.2M</b></div>
+          <div class="row"><span>Graded copies tracked</span><b>48.7M</b></div>
+          <div class="row"><span>Sales tracked since 2012</span><b>25.7M</b></div>
+        </div>
+        <div class="foot"><span>tcgcharts.com</span><span>as of 5 Nov 2026</span></div>
+      </div>
+    </a>
+
+    <a class="slab" href="https://www.tradingcardtrends.com/market/vintage" target="_blank" rel="noopener">
+      <div class="label"><span class="cert">IDX 05</span><span class="go">OPEN ↗</span></div>
+      <div class="body">
+        <div class="name">Trading Card Trends · Vintage</div>
+        <div class="head"><span class="k">Vintage index</span><span class="v">149.56</span></div>
+        <div class="chips"><span class="chip up">WK +0.89%</span><span class="chip up">Since late Mar +50%</span><span class="chip up">Up 5 wks in a row</span></div>
+        <div class="rows">
+          <div class="row"><span>English · WK</span><b class="up">+0.85%</b></div>
+          <div class="row"><span>Japanese · WK</span><b>0.00%</b></div>
+          <div class="row"><span>Top set · Team Rocket Returns</span><b class="up">+14.5%</b></div>
+          <div class="row"><span>Overall market index</span><b>116.8</b></div>
+        </div>
+        <div class="foot"><span>tradingcardtrends.com</span><span>week of 2 Nov 2026</span></div>
+      </div>
+    </a>
+
+    <a class="slab" href="https://pokeindex.app/stats" target="_blank" rel="noopener">
+      <div class="label"><span class="cert">IDX 06</span><span class="go">OPEN ↗</span></div>
+      <div class="body">
+        <div class="name">PokéIndex</div>
+        <p class="none">Site blocks automated reads. Open it for live figures.</p>
+        <div class="foot"><span>pokeindex.app</span></div>
+      </div>
+    </a>
+
+    <a class="slab" href="https://tcgindex.io/tcg-market-index" target="_blank" rel="noopener">
+      <div class="label"><span class="cert">IDX 07</span><span class="go">OPEN ↗</span></div>
+      <div class="body">
+        <div class="name">TCGIndex</div>
+        <div class="head"><span class="k">All 14 games (1 Jul 2026 = 100)</span><span class="v">115.8</span></div>
+        <div class="chips"><span class="chip up">30D +1.2%</span><span class="chip up">90D +7.4%</span></div>
+        <div class="rows">
+          <div class="row"><span>Pokémon index</span><b>120.3</b></div>
+          <div class="row"><span>Pokémon · 30D</span><b class="up">+0.7%</b></div>
+          <div class="row"><span>Pokémon · 90D</span><b class="up">+11.2%</b></div>
+          <div class="row"><span>Tracked value (all games)</span><b>$2.1M</b></div>
+        </div>
+        <div class="foot"><span>tcgindex.io</span><span>as of 4 Nov 2026</span></div>
+      </div>
+    </a>
+
+    <a class="slab" href="https://www.cardladder.com/indexes/pokemon" target="_blank" rel="noopener">
+      <div class="label"><span class="cert">IDX 08</span><span class="go">OPEN ↗</span></div>
+      <div class="body">
+        <div class="name">Card Ladder</div>
+        <p class="none">Site blocks automated reads. Open it for live figures.</p>
+        <div class="foot"><span>cardladder.com</span></div>
+      </div>
+    </a>
+  </div>
+
+  <footer>Figures are a snapshot read from each site on 5 Nov 2026, not live. Each tile opens the source in a new tab.</footer>
+</div>
+
+</body>
+</html>
